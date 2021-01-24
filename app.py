@@ -116,4 +116,8 @@ def getIPCounts():
         result = [ipCount for ipCount in ipCounts if isInsideBounds(minLat, maxLat, minLng, maxLng, ipCount)]
     return {"result": result}, 200
 
-app.run(debug=True)
+@app.route('/')
+def index():
+    return "<h1>Welcome to our server !!</h1>"
+
+# app.run(debug=True)
