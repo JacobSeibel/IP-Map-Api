@@ -7,7 +7,7 @@ import pandas as pd
 import json
 import sys
 sys.path.append("..")
-import ip_map_api.ipCount_pb2
+import ipCount_pb2
 import protobuf_to_dict
 from cachetools import cached, TTLCache
 import hashlib
@@ -50,7 +50,7 @@ def readData():
     if not createNew and cachedIpCounts != []:
         return cachedIpCounts
 
-    ipCountsProto = ip_map_api.ipCount_pb2.IPCounts()
+    ipCountsProto = ipCount_pb2.IPCounts()
     if not createNew:
         try:
             f = open(BIN_FILE, "rb")

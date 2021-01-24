@@ -1,1 +1,1 @@
-api: python app.py
+api: python ip_map_api/app.py
