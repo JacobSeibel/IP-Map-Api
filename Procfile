@@ -1,1 +1,1 @@
-api: python ip_map_api/app.py
+api: gunicorn app:app
