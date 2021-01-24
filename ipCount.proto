@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package ipmapapi;
+
+message IPCounts {
+    repeated IPCount ipCounts = 1;
+}
+
+message IPCount {
+    float latitude = 1;
+    float longitude = 2;
+    int32 count = 3;
+}
