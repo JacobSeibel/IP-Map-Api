@@ -3,10 +3,11 @@ import os
 from flask import Flask, request
 from flask_restful import Api
 from flask_cors import CORS, cross_origin
-import csv
 import pandas as pd
 import json
 import sys
+
+from pandas.core.frame import DataFrame
 sys.path.append("..")
 import ipCount_pb2
 import protobuf_to_dict
@@ -70,13 +71,14 @@ def readData():
 
     if createNew:
         print("Creating new protocol buffer")
-        ipBlocks = []
 
         zipData = BytesIO(readDataFile())
         zipFile = ZipFile(zipData)
         dataFile = zipFile.open(DATA_FILE)
+        ipBlocksDF: DataFrame = DataFrame()
+        for chunk in pd.read_csv(dataFile, encoding='utf-8', chunksize=100000):
+            ipBlocksDF = ipBlocksDF.append(chunk)
 
-        ipBlocksDF = pd.read_csv(dataFile, encoding='utf-8')
         ipCountsDF = pd.DataFrame(ipBlocksDF).pivot_table(index=['latitude', 'longitude'], aggfunc='size')
         for ipCount in ipCountsDF.items():
             if ipCount[0][0] != '' and ipCount[0][1] != '':
