@@ -86,6 +86,11 @@ def readData():
                 newCount.latitude = float(ipCount[0][0])
                 newCount.longitude = float(ipCount[0][1])
                 newCount.count = ipCount[1]
+        if not os.path.exists(os.path.dirname(BIN_FILE)):
+            try:
+                os.makedirs(os.path.dirname(BIN_FILE))
+            except OSError as exc: # Guard against race condition
+                raise
         f = open(BIN_FILE, "wb")
         f.write(ipCountsProto.SerializeToString())
         f.close()
