@@ -76,7 +76,7 @@ def readData():
         zipFile = ZipFile(zipData)
         dataFile = zipFile.open(DATA_FILE)
         ipBlocksDF: DataFrame = DataFrame()
-        for chunk in pd.read_csv(dataFile, encoding='utf-8', chunksize=100000):
+        for chunk in pd.read_csv(dataFile, encoding='utf-8', chunksize=50000):
             ipBlocksDF = ipBlocksDF.append(chunk[['latitude', 'longitude']])
 
         ipCountsDF = pd.DataFrame(ipBlocksDF).pivot_table(index=['latitude', 'longitude'], aggfunc='size')
@@ -127,3 +127,4 @@ def getIPCounts():
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
     app.run(threaded=True, port=5000)
+    readData() # Prime the cache
