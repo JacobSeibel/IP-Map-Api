@@ -77,7 +77,7 @@ def readData():
         dataFile = zipFile.open(DATA_FILE)
         ipBlocksDF: DataFrame = DataFrame()
         for chunk in pd.read_csv(dataFile, encoding='utf-8', chunksize=100000):
-            ipBlocksDF = ipBlocksDF.append(chunk)
+            ipBlocksDF = ipBlocksDF.append(chunk[['latitude', 'longitude']])
 
         ipCountsDF = pd.DataFrame(ipBlocksDF).pivot_table(index=['latitude', 'longitude'], aggfunc='size')
         for ipCount in ipCountsDF.items():
