@@ -1,3 +1,4 @@
+from io import BytesIO
 import os
 from flask import Flask, request
 from flask_restful import Api
@@ -11,20 +12,23 @@ import ipCount_pb2
 import protobuf_to_dict
 from cachetools import cached, TTLCache
 import hashlib
+import urllib
+from zipfile import ZipFile
 
 app = Flask(__name__)
 cache = TTLCache(maxsize=1024, ttl=600)
 cors = CORS(app)
 api = Api(app)
 
-DATA_FILE = "data/GeoLite2-City-Blocks-IPv4.csv"
+DATA_URL = "https://storage.googleapis.com/interview_materials/GeoLite2-City-CSV_20190618.zip"
+DATA_FILE = "GeoLite2-City-CSV_20190618/GeoLite2-City-Blocks-IPv4.csv"
 BIN_FILE = "data/ipCounts.bin"
 
 def readDataFile():
     try:
-       return open(DATA_FILE, 'rb').read()
+       return urllib.request.urlopen(DATA_URL).read()
     except IOError:
-        print("Couldn't find the data file! Please provide this file: " + DATA_FILE)
+        print("Couldn't find the data zip! Please provide this file: " + DATA_URL)
         return {}
 
 fileHash = hashlib.md5()
@@ -62,21 +66,18 @@ def readData():
             print("Could not open " + BIN_FILE + ". Creating a new one from data.")
             createNew = True
             if noData:
-                print("...If I had any!! Please provide " + DATA_FILE)
+                print("...If I had any!! Please provide " + DATA_URL)
 
     if createNew:
         print("Creating new protocol buffer")
         ipBlocks = []
-        with open(DATA_FILE, newline='', encoding='utf-8') as csvfile:
-            next(csvfile)
-            blocksReader = csv.reader(csvfile, delimiter=',', quotechar='"')
-            for row in blocksReader:
-                ipBlocks.append({
-                    "latitude": row[7],
-                    "longitude": row[8],
-                })
 
-        ipCountsDF = pd.DataFrame(ipBlocks).pivot_table(index=['latitude', 'longitude'], aggfunc='size')
+        zipData = BytesIO(readDataFile())
+        zipFile = ZipFile(zipData)
+        dataFile = zipFile.open(DATA_FILE)
+
+        ipBlocksDF = pd.read_csv(dataFile, encoding='utf-8')
+        ipCountsDF = pd.DataFrame(ipBlocksDF).pivot_table(index=['latitude', 'longitude'], aggfunc='size')
         for ipCount in ipCountsDF.items():
             if ipCount[0][0] != '' and ipCount[0][1] != '':
                 newCount = ipCountsProto.ipCounts.add()
@@ -115,10 +116,6 @@ def getIPCounts():
             if bound[1] > maxLng: maxLng = bound[1]
         result = [ipCount for ipCount in ipCounts if isInsideBounds(minLat, maxLat, minLng, maxLng, ipCount)]
     return {"result": result}, 200
-
-@app.route('/')
-def index():
-    return "<h1>Welcome to our server !!</h1>"
 
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
