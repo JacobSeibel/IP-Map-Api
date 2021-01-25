@@ -20,13 +20,12 @@ app = Flask(__name__)
 cache = TTLCache(maxsize=1024, ttl=600)
 cors = CORS(app)
 api = Api(app)
-chunkSizeEnv = os.environ.get('CHUNK_SIZE')
+chunkSizeEnv = int(os.environ.get('CHUNK_SIZE'))
 
 DATA_URL = "https://storage.googleapis.com/interview_materials/GeoLite2-City-CSV_20190618.zip"
 DATA_FILE = "GeoLite2-City-CSV_20190618/GeoLite2-City-Blocks-IPv4.csv"
 BIN_FILE = "data/ipCounts.bin"
 CHUNK_SIZE = chunkSizeEnv if chunkSizeEnv else 1000000
-print(CHUNK_SIZE)
 
 def readDataFile():
     try:
