@@ -96,6 +96,7 @@ def readData():
         f = open(BIN_FILE, "wb")
         f.write(ipCountsProto.SerializeToString())
         f.close()
+        print("Protocol buffer created!")
     
     cachedIpCounts = protobuf_to_dict.protobuf_to_dict(ipCountsProto, including_default_value_fields=True)['ipCounts']
     return cachedIpCounts
